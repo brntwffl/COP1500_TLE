@@ -1,13 +1,12 @@
 import pygame
 from pygame.locals import *
-import pickle5
-import pickle
 
 pygame.init()
 
 clock = pygame.time.Clock()
 fps = 60
 
+#screen dimensions
 screen_width = 1500
 screen_height = 700
 
@@ -15,6 +14,7 @@ screen_height = 700
 font = pygame.font.SysFont('Bauhaus 93', 70)
 font_score = pygame.font.SysFont('Bauhaus 93', 30)
 
+#open game window
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('The Lunar Experiment')
 
@@ -73,8 +73,6 @@ class Button():
 		screen.blit(self.image, self.rect)
 
 		return action
-
-
 
 class Player():
 	def __init__(self, x, y):
@@ -164,15 +162,15 @@ class Player():
 						self.vel_y = 0
 						self.in_air = False
 
-			#check for collision with enemies
+			#check for enemies
 			if pygame.sprite.spritecollide(self, enemy_group, False):
 				game_over = -1
 
-			# check for collision with lava
+			# check for lava
 			if pygame.sprite.spritecollide(self, sludge_group, False):
 				game_over = -1
 
-			# check for collision with exit
+			# check for exit
 			if pygame.sprite.spritecollide(self, exit_group, False):
 				game_over = 1
 
@@ -185,7 +183,7 @@ class Player():
 			if self.rect.y > 200:
 				self.rect.y -= 5
 
-		#draw player onto screen
+		#draw player
 		screen.blit(self.image, self.rect)
 
 		return game_over
@@ -221,7 +219,6 @@ class World():
 		rock_img = pygame.image.load('lunarexperiment/rocktexture1.png')
 		space_rock = pygame.image.load('lunarexperiment/spacerock.png')
 		sludge = pygame.image.load('lunarexperiment/sludge.png')
-		door = pygame.image.load('lunarexperiment/door.png')
 
 		row_count = 0
 		for row in data:
@@ -302,26 +299,17 @@ class Exit(pygame.sprite.Sprite):
 		self.rect.x = x
 		self.rect.y = y
 
-
-
-	def update(self):
-		self.rect.x += self.move_direction
-		self.move_counter += 1
-		if abs (self.move_counter) > 50:
-			self.move_direction *= -1
-			self.move_counter *= -1
-
-
-
+#groups
 coin_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 sludge_group = pygame.sprite.Group()
 exit_group = pygame.sprite.Group()
 
-#create dummy coin for showing the score
+#display coin
 score_coin = Coin(tile_size // 2, tile_size // 2)
 coin_group.add(score_coin)
 
+#create the world
 world_data = [
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -339,17 +327,14 @@ world_data = [
 [1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
-
 player = Player(100, screen_height - 130)
 
 world = World(world_data)
 
-#create buttons
+#buttons
 restart_button = Button(screen_width // 2 - 625, screen_height // 2 + -50, restart_img)
 start_button = Button(screen_width // 2 - 625, screen_height // 2 - 175, start_img)
 exit_button = Button(screen_width // 2 - 605, screen_height // 2 - 25, exit_img)
-
-
 
 run = True
 while run:
@@ -369,7 +354,7 @@ while run:
 		if game_over == 0:
 			enemy_group.update()
 			# update score
-			# check if a coin has been collected
+			# check for coin
 			if pygame.sprite.spritecollide(player, coin_group, True):
 				score += 1
 			draw_text('X ' + str(score), font_score, white, tile_size - 10, 10)
@@ -381,17 +366,17 @@ while run:
 
 		game_over = player.update(game_over)
 
-		# if player has died
+		# if died
 		if game_over == -1:
 			if restart_button.draw():
 				player.reset(100, screen_height - 130)
 				game_over = 0
 
 
-		# if player has completed the level
+		# completed the level
 		if game_over == 1:
 				draw_text('YOU WIN!', font, white, (screen_width // 2) + 180, (screen_height // 2) - 40)
-				
+
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
